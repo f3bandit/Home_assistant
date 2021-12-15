@@ -1,3 +1,15 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
 #================================#
 #=== Raspberry Pi Cooling Fan ===#
 #================================#
@@ -8,6 +20,14 @@ sensor:
     unit_of_measurement: "°F"
     value_template: "{{ value | multiply(0.001) | round(2) }}"
     scan_interval: 10
+  - platform: systemmonitor
+    resources:
+      - type: last_boot
+      - type: disk_use_percent
+      - type: memory_use_percent
+      - type: processor_use
+      - type: swap_use_percent
+      - type: last_boot
 
 switch:
   - platform: rpi_gpio

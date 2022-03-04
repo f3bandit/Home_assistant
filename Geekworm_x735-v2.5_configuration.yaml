@@ -17,9 +17,14 @@ sensor:
   - platform: command_line
     name: CPU Temperature
     command: "cat /sys/class/thermal/thermal_zone0/temp"
-    unit_of_measurement: "°F"
-    value_template: "{{ value | multiply(0.001) | round(2) }}"
+    unit_of_measurement: "°C"
+    value_template: "{{ value | multiply(0.001) | round(1) }}"
     scan_interval: 10
+
+  #======================#
+  #=== System Monitor ===#
+  #======================#
+
   - platform: systemmonitor
     resources:
       - type: last_boot
@@ -27,19 +32,39 @@ sensor:
       - type: memory_use_percent
       - type: processor_use
       - type: swap_use_percent
-      - type: last_boot
+  - platform: uptime
+    name: Time Online
+
+  #==============================#
+  #=== Cat_TV Files Component ===#
+  #==============================#
+
+  - platform: files
+    folder: /config/www/cat_tv
+    filter: "**/*.mp4"
+    name: cat_tv
+    sort: date
+    recursive: True
+
+#===================================#
+#=== Raspberry Pi Cooling Switch ===#
+#===================================#
 
 switch:
   - platform: rpi_gpio
     ports:
       13: RPI Cooling Fan
 
+#=======================================#
+#=== Raspberry Pi Cooling Thermostat ===#
+#=======================================#
+
 climate:
   - platform: generic_thermostat
     name: RPI Cooling Fan Controller
     heater: switch.rpi_cooling_fan
     target_sensor: sensor.cpu_temperature
-    min_temp: 45
+    min_temp: 20
     max_temp: 75
     ac_mode: true
     target_temp: 40
@@ -50,3 +75,26 @@ climate:
     keep_alive:
       minutes: 5
     initial_hvac_mode: "cool"
+
+#=================================#
+#=== Cat_TV Local Media Source ===#
+#=================================#
+
+homeassistant:
+  media_dirs:
+    local: /media
+
+#==============#
+#=== Themes ===#
+#==============#
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+#===================#
+#=== Sonos Cloud ===#
+#===================#
+
+sonos_cloud:
+  client_id: abb4350c-84b6-4de1-845d-4a8c0f0d5548
+  client_secret: 095f61ef-d3cb-4561-8bb7-7aa106471d39
